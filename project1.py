@@ -1,47 +1,50 @@
-class State:
+class State(object):
     def __init__(self):
-        pass
+        raise NotImplementedError("Should have implemented this")
 
     def __str__(self):
-        pass
+        raise NotImplementedError("Should have implemented this")
 
-class SearchNode:
+
+class SearchNode(object):
     def __init__(self, state, parent_node, operator, depth, path_cost):
-        pass
+        raise NotImplementedError("Should have implemented this")
 
     def __str__(self):
-        pass
+        raise NotImplementedError("Should have implemented this")
 
-class SearchProblem:
+
+class SearchProblem(object):
     def __init__(self, operators, initial_state, state_space):
-        pass
+        raise NotImplementedError("Should have implemented this")
 
     def goal_test(self, state):
         ''' checks if the state matches the goal or not'''
-        pass
+        raise NotImplementedError("Should have implemented this")
 
     def path_cost(self, actions):
         ''' assings cost to the sequence of actions '''
-        pass
+        raise NotImplementedError("Should have implemented this")
 
     def expand_node(self, node):
         ''' returns a set of nodes resulting from all the operators '''
-        pass
+        raise NotImplementedError("Should have implemented this")
 
-class SearchQueue:
+
+class SearchQueue(object):
     def __init__(self, qing_func):
-        pass
+        raise NotImplementedError("Should have implemented this")
 
     def __str__(self):
-        pass
+        raise NotImplementedError("Should have implemented this")
 
     def queue(self, search_nodes):
         ''' Add the search_node(s) to the queue according to the qing func '''
-        pass
+        raise NotImplementedError("Should have implemented this")
 
     def remove_front(self):
         ''' returns the front node of the queue '''
-        pass
+        raise NotImplementedError("Should have implemented this")
 
 
 def general_search(search_problem, qing_func):
@@ -52,6 +55,6 @@ def general_search(search_problem, qing_func):
         if nodes.empty():
             return False
         node = nodes.remove_front()
-        if search_problem.goal_test(state):
+        if search_problem.goal_test(node.state):
             return node
         nodes.queue(search_problem.expand_node(node))
