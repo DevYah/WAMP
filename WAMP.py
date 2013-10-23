@@ -1,19 +1,16 @@
 from ADTs import State, SearchNode, SearchProblem#, SearchQueue
 from random import random, randint
 from pprint import pprint, pformat
+from copy import deepcopy, copy
 
 
 class Grid(State):
 
-    __static_grid = []
-
-    def __init__(self, restore=False, save=True):
-        self.grid = Grid.gen_grid() if not restore else Grid.__static_grid
+    def __init__(self, grid=None):
+        self.grid = grid or Grid.gen_grid()
         self.side = len(self.grid)
         self.parts_locations = self.store_part_locations()
         self.num_parts = len(self.parts_locations)
-        if save:
-            Grid.__static_grid = self
 
     def __str__(self):
         s = pformat(self.grid)
@@ -31,14 +28,60 @@ class Grid(State):
         for i in xrange(len(self.grid)):
             for j in xrange(len(self.grid[i])):
                 if self.grid[i][j] == 'R':
-                    locations.append((i, j))
+                    locations.append([i, j])
         return locations
 
     def possible_operators(self):
         # TODO handle assembled parts
         motions = ['N', 'E', 'S', 'W']
         n_parts = self.num_parts
-        return [zip([part] * 4, motions) for part in xrange(n_parts)]
+        return [(part, motion) for part in xrange(n_parts) for motion in motions]
+
+    def apply_operator(self, operator):
+        # TODO handle assembled parts
+        new_grid = deepcopy(self.grid)
+        part_number = operator[0]
+        old_place = self.parts_locations[part_number]
+
+        def move(old_place, direction):
+            new_place = copy(old_place)
+            if direction == 'N':
+                new_place[0] -= 1
+            elif direction == 'E':
+                new_place[1] += 1
+            elif direction == 'S':
+                new_place[0] += 1
+            elif direction == 'W':
+                new_place[1] -= 1
+            return new_place
+
+        new_place = move(old_place, operator[1])
+        in_range = 0 <= new_place[0], new_place[0] < len(self.grid)
+        in_range = reduce(lambda x, y: x & y, in_range)
+
+        print "old place is %s" % old_place.__str__()
+        print "new place is %s" % new_place.__str__()
+        old_value = self.grid[new_place[0]][new_place[1]] if in_range else 'barbed'
+        print "existig value is %s" % old_value
+
+        feedback = '555'
+        if old_value == '_':
+            feedback = 'smooth'
+        elif old_value == 'X':
+            feedback = 'obstacle'
+        elif old_value == 'R':  # FIXME handle assemebled pieces
+            feedback = 'robot'
+        elif not in_range:
+            feedback = 'damage'
+        else:
+            print 'something is terribly wrong'
+            pprint(self.grid)
+
+        if feedback == 'smooth':
+            new_grid[old_place[0]][old_place[1]] = '_'
+            new_grid[new_place[0]][new_place[1]] = 'R'
+
+        return [Grid(new_grid), feedback]
 
     @staticmethod
     def gen_grid():
@@ -56,6 +99,10 @@ class Grid(State):
         grid = [[mapping(cell) for cell in row] for row in grid]
         return grid
 
+    @staticmethod
+    def static_grid():
+        return Grid.__static_grid
+
 
 class WAMP_SearchNode(SearchNode):
     def __init__(self, state, parent_node=None,
@@ -70,6 +117,10 @@ class WAMP_SearchNode(SearchNode):
         self.operator = operator
         self.depth = depth
         self.path_cost = path_cost
+
+    def expand(self):
+        operators = self.state.possible_operators()
+        pass
 
 
 class WAMP_SearchProblem(SearchProblem):
@@ -92,6 +143,13 @@ class WAMP_SearchProblem(SearchProblem):
 
 g = Grid()
 print g.num_parts
+print g
 search_problem = WAMP_SearchProblem(g)
-
-print search_problem.operators
+ops = search_problem.operators
+op = ops[2]
+print 'Applying operator %s' % op.__str__()
+place = g.parts_locations[op[0]]
+print "moving part %d at (%d,%d) to %s" % (op[0], place[0], place[1], op[1])
+after_apply = g.apply_operator(op)
+print after_apply[1]
+print(after_apply[0])
