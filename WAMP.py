@@ -10,9 +10,20 @@ class Grid(State):
     def __init__(self):
         self.grid = Grid.gen_grid()
         self.side = len(self.grid)
+        self.parts_locations = self.store_part_locations()
 
     def __str__(self):
-        return pformat(self.grid)
+        s = pformat(self.grid)
+        s += "\n %s" % pformat(self.parts_locations)
+        return s
+
+    def store_part_locations(self):
+        locations = []
+        for i in xrange(len(self.grid)):
+            for j in xrange(len(self.grid[i])):
+                if self.grid[i][j] == 'X':
+                    locations.append((i, j))
+        return locations
 
     @staticmethod
     def gen_grid(save=True):
