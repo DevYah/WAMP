@@ -7,14 +7,14 @@ class Grid(State):
 
     __static_grid = []
 
-    def __init__(self):
-        self.grid = Grid.gen_grid()
+    def __init__(self, restore=False):
+        self.grid = Grid.gen_grid() if not restore else Grid.__static_grid
         self.side = len(self.grid)
         self.parts_locations = self.store_part_locations()
 
     def __str__(self):
         s = pformat(self.grid)
-        s += "\n %s" % pformat(self.parts_locations)
+        #s += "\n %s" % pformat(self.parts_locations)
         return s
 
     def store_part_locations(self):
@@ -24,6 +24,12 @@ class Grid(State):
                 if self.grid[i][j] == 'X':
                     locations.append((i, j))
         return locations
+
+    def __eq__(self, other):
+        return self.grid == other.grid
+
+    def __ne__(self, other):
+        return self.grid != other.grid
 
     @staticmethod
     def gen_grid(save=True):
@@ -44,4 +50,5 @@ class Grid(State):
         return grid
 
 g = Grid()
-print g
+g2 = Grid(restore=True)
+print g == g2
