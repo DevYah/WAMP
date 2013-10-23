@@ -15,7 +15,24 @@ class SearchNode(object):
 
 
 class SearchProblem(object):
-    def __init__(self, operators, initial_state, state_space):
+    def __init__(self, initial_state):
+        '''
+        {operators} are accessed via the {self.operators} method
+        {state_space} is also not stored, but calculated
+        {goal_test} is also used via a method {self.goal_test}
+        {path_cost} is also used via a method {self.path_cost}
+        '''
+        raise NotImplementedError("Should have implemented this")
+
+    def operators(self):
+        ''' The list of all possible operators regardless of the state '''
+        raise NotImplementedError("Should have implemented this")
+
+    def state_space(self, seq_actions):
+        '''
+        given a sequence of actions, return a resutling state from
+        applying the sequence to the initial state
+        '''
         raise NotImplementedError("Should have implemented this")
 
     def goal_test(self, state):
