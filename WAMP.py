@@ -38,6 +38,7 @@ class Grid(State):
         return [(part, motion) for part in xrange(n_parts) for motion in motions]
 
     def apply_operator(self, operator):
+        ''' returns an array of the new State (Grid) and a feedback '''
         # TODO handle assembled parts
         new_grid = deepcopy(self.grid)
         part_number = operator[0]
@@ -56,13 +57,10 @@ class Grid(State):
             return new_place
 
         new_place = move(old_place, operator[1])
-        in_range = 0 <= new_place[0], new_place[0] < len(self.grid)
-        in_range = reduce(lambda x, y: x & y, in_range)
+        in_range = 0 <= new_place[0] < len(self.grid)
+        in_range &= 0 <= new_place[1] < len(self.grid)
 
-        print "old place is %s" % old_place.__str__()
-        print "new place is %s" % new_place.__str__()
         old_value = self.grid[new_place[0]][new_place[1]] if in_range else 'barbed'
-        print "existig value is %s" % old_value
 
         feedback = '555'
         if old_value == '_':
@@ -83,6 +81,9 @@ class Grid(State):
 
         return [Grid(new_grid), feedback]
 
+    def is_goal(self):
+        pass
+
     @staticmethod
     def gen_grid():
         side = randint(4, 8)
@@ -98,10 +99,6 @@ class Grid(State):
                 return '_'
         grid = [[mapping(cell) for cell in row] for row in grid]
         return grid
-
-    @staticmethod
-    def static_grid():
-        return Grid.__static_grid
 
 
 class WAMP_SearchNode(SearchNode):
@@ -120,7 +117,16 @@ class WAMP_SearchNode(SearchNode):
 
     def expand(self):
         operators = self.state.possible_operators()
-        pass
+        nodes = []
+        for operator in operators:
+            new_state, feedback = self.state.apply_operator(operator)
+            cost = 1  # FIXME make it depend on the feedback
+            new_node = WAMP_SearchNode(new_state, parent_node=self,
+                                       operator=operator,
+                                       depth=self.depth + 1,
+                                       path_cost=self.path_cost + cost)
+            nodes.append(new_node)
+        return nodes
 
 
 class WAMP_SearchProblem(SearchProblem):
@@ -145,11 +151,14 @@ g = Grid()
 print g.num_parts
 print g
 search_problem = WAMP_SearchProblem(g)
-ops = search_problem.operators
-op = ops[2]
-print 'Applying operator %s' % op.__str__()
-place = g.parts_locations[op[0]]
-print "moving part %d at (%d,%d) to %s" % (op[0], place[0], place[1], op[1])
-after_apply = g.apply_operator(op)
-print after_apply[1]
-print(after_apply[0])
+
+start_node = WAMP_SearchNode(search_problem.initial_state)
+
+#ops = search_problem.operators
+#op = ops[2]
+#print 'Applying operator %s' % op.__str__()
+#place = g.parts_locations[op[0]]
+#print "moving part %d at (%d,%d) to %s" % (op[0], place[0], place[1], op[1])
+#after_apply = g.apply_operator(op)
+#print after_apply[1]
+#print(after_apply[0])
