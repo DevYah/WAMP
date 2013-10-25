@@ -15,7 +15,7 @@ class Grid(State):
 
     def __str__(self):
         s = pformat(self.grid)
-        #s += "\n %s" % pformat(self.parts_locations)
+        # s += "\n %s" % pformat(self.parts_locations)
         return s
 
     def __eq__(self, other):
@@ -61,7 +61,10 @@ class Grid(State):
         in_range = 0 <= new_place[0] < len(self.grid)
         in_range &= 0 <= new_place[1] < len(self.grid)
 
-        old_value = self.grid[new_place[0]][new_place[1]] if in_range else 'barbed'
+        if in_range:
+            old_value = self.grid[new_place[0]][new_place[1]]
+        else:
+            old_value = 'barbed'
 
         feedback = '555'
         if old_value == '_':
@@ -99,6 +102,7 @@ class Grid(State):
 
 
 class WAMP_SearchNode(SearchNode):
+
     def __init__(self, state, parent_node=None,
                  operator=None, depth=0, path_cost=0):
         '''
@@ -135,7 +139,9 @@ class WAMP_SearchNode(SearchNode):
         print self
         self.parent_node.print_path() if self.parent_node is not None else None
 
+
 class WAMP_SearchProblem(SearchProblem):
+
     def __init__(self, initial_state):
         self.initial_state = initial_state
         self.operators = self.initial_state.possible_operators()
@@ -147,7 +153,8 @@ class WAMP_SearchProblem(SearchProblem):
         def has_adj(place1, places):
             flag = False or len(places) == 0
             for place2 in places:
-                flag |= (abs(place1[0] - place2[0]) + abs(place1[1] - place2[1])) == 1
+                flag |= (abs(place1[0] - place2[0]) +
+                         abs(place1[1] - place2[1])) == 1
                 if flag:
                     break
             return flag
@@ -184,9 +191,8 @@ def run():
     g = Grid()
     search_problem = WAMP_SearchProblem(g)
 
-    #nodes_q = BFS_Queue()
+    # nodes_q = BFS_Queue()
     return general_search(search_problem, BFS_Queue())
 
 node = run()
 node.print_path()
-
