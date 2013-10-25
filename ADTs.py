@@ -49,7 +49,7 @@ class SearchProblem(object):
 
 
 class SearchQueue(object):
-    def __init__(self, qing_func):
+    def __init__(self):
         raise NotImplementedError("Should have implemented this")
 
     def __str__(self):
@@ -64,9 +64,9 @@ class SearchQueue(object):
         raise NotImplementedError("Should have implemented this")
 
 
-def general_search(search_problem, qing_func):
+def general_search(search_problem, queue):
     start_node = SearchNode(search_problem.initial_state)
-    nodes = SearchQueue(qing_func)
+    nodes = queue
     nodes.queue(start_node)
     while True:
         if nodes.empty():

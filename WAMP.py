@@ -1,4 +1,4 @@
-from ADTs import State, SearchNode, SearchProblem#, SearchQueue
+from ADTs import State, SearchNode, SearchProblem, SearchQueue
 from random import random, randint
 from pprint import pprint, pformat
 from copy import deepcopy, copy
@@ -81,13 +81,10 @@ class Grid(State):
 
         return [Grid(new_grid), feedback]
 
-    def is_goal(self):
-        pass
 
     @staticmethod
     def gen_grid():
         side = randint(4, 8)
-        print 'Generating random grid of size %d' % side
         grid = [[random() for _ in xrange(side)] for _ in xrange(side)]
 
         def mapping(x):
@@ -138,7 +135,23 @@ class WAMP_SearchProblem(SearchProblem):
         pass
 
     def goal_test(self, state):
-        pass
+        def has_adj(place1, places):
+            flag = False or len(places) == 0
+            for place2 in places:
+                flag |= (abs(sum(place1) - sum(place2)) == 1)
+                if flag:
+                    break
+            return flag
+
+        adj_parts = []
+        for location in state.parts_locations:
+            print adj_parts
+            if has_adj(location, adj_parts):
+                adj_parts.append(location)
+            else:
+                return False
+
+        return True
 
     def path_cost(self, actions):
         pass
@@ -148,10 +161,10 @@ class WAMP_SearchProblem(SearchProblem):
 
 
 g = Grid()
-print g.num_parts
 print g
 search_problem = WAMP_SearchProblem(g)
 
+print search_problem.goal_test(g)
 start_node = WAMP_SearchNode(search_problem.initial_state)
 
 #ops = search_problem.operators
