@@ -1,7 +1,8 @@
-from ADTs import State, SearchNode, SearchProblem, SearchQueue
+from ADTs import State, SearchNode, SearchProblem
 from random import random, randint
 from pprint import pprint, pformat
 from copy import deepcopy, copy
+from search_queues import BFS_Queue
 
 
 class Grid(State):
@@ -81,16 +82,15 @@ class Grid(State):
 
         return [Grid(new_grid), feedback]
 
-
     @staticmethod
     def gen_grid():
-        side = randint(4, 8)
+        side = randint(4, 5)
         grid = [[random() for _ in xrange(side)] for _ in xrange(side)]
 
         def mapping(x):
             if x < 0.2:
                 return 'R'
-            elif x < 0.5:
+            elif x < 0.3:
                 return 'X'
             else:
                 return '_'
@@ -112,19 +112,28 @@ class WAMP_SearchNode(SearchNode):
         self.depth = depth
         self.path_cost = path_cost
 
+    def __str__(self):
+        s = "Node, Depth: %d, operator: %s\n" % (self.depth, self.operator)
+        s += format(self.state)
+        return s
+
     def expand(self):
         operators = self.state.possible_operators()
         nodes = []
         for operator in operators:
             new_state, feedback = self.state.apply_operator(operator)
             cost = 1  # FIXME make it depend on the feedback
-            new_node = WAMP_SearchNode(new_state, parent_node=self,
+            new_node = WAMP_SearchNode(new_state,
+                                       parent_node=self,
                                        operator=operator,
                                        depth=self.depth + 1,
                                        path_cost=self.path_cost + cost)
             nodes.append(new_node)
         return nodes
 
+    def print_path(self):
+        print self
+        self.parent_node.print_path() if self.parent_node is not None else None
 
 class WAMP_SearchProblem(SearchProblem):
     def __init__(self, initial_state):
@@ -138,14 +147,13 @@ class WAMP_SearchProblem(SearchProblem):
         def has_adj(place1, places):
             flag = False or len(places) == 0
             for place2 in places:
-                flag |= (abs(sum(place1) - sum(place2)) == 1)
+                flag |= (abs(place1[0] - place2[0]) + abs(place1[1] - place2[1])) == 1
                 if flag:
                     break
             return flag
 
         adj_parts = []
         for location in state.parts_locations:
-            print adj_parts
             if has_adj(location, adj_parts):
                 adj_parts.append(location)
             else:
@@ -157,21 +165,28 @@ class WAMP_SearchProblem(SearchProblem):
         pass
 
     def expand_node(self, node):
-        pass
+        return node.expand()
 
 
-g = Grid()
-print g
-search_problem = WAMP_SearchProblem(g)
+def general_search(search_problem, nodes_q):
+    start_node = WAMP_SearchNode(search_problem.initial_state)
+    nodes_q.enqueue([start_node])
+    while True:
+        if len(nodes_q) == 0:
+            return False
+        node = nodes_q.remove_front()
+        if search_problem.goal_test(node.state):
+            return node
+        nodes_q.enqueue(search_problem.expand_node(node))
 
-print search_problem.goal_test(g)
-start_node = WAMP_SearchNode(search_problem.initial_state)
 
-#ops = search_problem.operators
-#op = ops[2]
-#print 'Applying operator %s' % op.__str__()
-#place = g.parts_locations[op[0]]
-#print "moving part %d at (%d,%d) to %s" % (op[0], place[0], place[1], op[1])
-#after_apply = g.apply_operator(op)
-#print after_apply[1]
-#print(after_apply[0])
+def run():
+    g = Grid()
+    search_problem = WAMP_SearchProblem(g)
+
+    #nodes_q = BFS_Queue()
+    return general_search(search_problem, BFS_Queue())
+
+node = run()
+node.print_path()
+

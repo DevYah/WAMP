@@ -55,23 +55,13 @@ class SearchQueue(object):
     def __str__(self):
         raise NotImplementedError("Should have implemented this")
 
-    def queue(self, search_nodes):
+    def __len__(self):
+        raise NotImplementedError("Should have implemented this")
+
+    def enqueue(self, nodes):
         ''' Add the search_node(s) to the queue according to the qing func '''
         raise NotImplementedError("Should have implemented this")
 
     def remove_front(self):
         ''' returns the front node of the queue '''
         raise NotImplementedError("Should have implemented this")
-
-
-def general_search(search_problem, queue):
-    start_node = SearchNode(search_problem.initial_state)
-    nodes = queue
-    nodes.queue(start_node)
-    while True:
-        if nodes.empty():
-            return False
-        node = nodes.remove_front()
-        if search_problem.goal_test(node.state):
-            return node
-        nodes.queue(search_problem.expand_node(node))
