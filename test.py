@@ -44,5 +44,31 @@ def test_apply_operator_obstacle():
     assert new_grid.grid == [['R', '_', 'X'], ['X', '_', '_'], ['X', '_', '_']]
     print 'PASSES OBSTACLE TEST'
 
+
+def test_bfs_solution_simple1():
+    g_ar = [['_', 'X', '_'],
+            ['R', '_', '_'],
+            ['_', 'R', '_']]
+    g = Grid(g_ar)
+    search_problem = WAMP_SearchProblem(g)
+    nodes_q = BFS_Queue()
+    goal_node = general_search(search_problem, nodes_q)
+    assert search_problem.goal_test(goal_node.state)
+    print 'PASSES BFS SIMPLE1'
+
+
+def test_bfs_solution_simple2():
+    g_ar = [['_', 'X', '_'],
+            ['R', '_', 'X'],
+            ['_', 'R', '_']]
+    g = Grid(g_ar)
+    search_problem = WAMP_SearchProblem(g)
+    nodes_q = BFS_Queue()
+    goal_node = general_search(search_problem, nodes_q)
+    goal_node = general_search(search_problem, nodes_q)
+    print 'PASSES BFS SIMPLE2'
+
 test_apply_operator_damadge()
 test_apply_operator_obstacle()
+test_bfs_solution_simple1()
+test_bfs_solution_simple2()

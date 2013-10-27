@@ -189,7 +189,7 @@ def general_search(search_problem, nodes_q):
         if len(nodes_q) == 0:
             return False
         node = nodes_q.remove_front()
-        print "%d %d" % (node.depth, len(nodes_q))
+        #print "%d %d" % (node.depth, len(nodes_q))
         if search_problem.goal_test(node.state):
             return node
         nodes_q.enqueue(search_problem.expand_node(node))
