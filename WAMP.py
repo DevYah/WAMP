@@ -41,9 +41,6 @@ class Grid(State):
     def apply_operator(self, operator):
         ''' returns an array of the new State (Grid) and a feedback '''
         # TODO handle assembled parts
-        new_grid = deepcopy(self.grid)
-        part_number = operator[0]
-        old_place = self.parts_locations[part_number]
 
         def move(old_place, direction):
             new_place = copy(old_place)
@@ -57,31 +54,40 @@ class Grid(State):
                 new_place[1] -= 1
             return new_place
 
-        new_place = move(old_place, operator[1])
-        in_range = 0 <= new_place[0] < len(self.grid)
-        in_range &= 0 <= new_place[1] < len(self.grid)
+        new_grid = deepcopy(self.grid)
+        part_number = operator[0]
+        old_place = self.parts_locations[part_number]
+        feedback = None
+        while feedback == 'smooth' or feedback is None:
+            new_place = move(old_place, operator[1])
+            in_range = 0 <= new_place[0] < len(self.grid)
+            in_range &= 0 <= new_place[1] < len(self.grid)
 
-        if in_range:
-            old_value = self.grid[new_place[0]][new_place[1]]
-        else:
-            old_value = 'barbed'
+            if in_range:
+                old_value = self.grid[new_place[0]][new_place[1]]
+            else:
+                old_value = 'W'
 
-        feedback = '555'
-        if old_value == '_':
-            feedback = 'smooth'
-        elif old_value == 'X':
-            feedback = 'obstacle'
-        elif old_value == 'R':  # FIXME handle assemebled pieces
-            feedback = 'robot'
-        elif not in_range:
-            feedback = 'damage'
-        else:
-            print 'something is terribly wrong'
-            pprint(self.grid)
+            feedback = '555'
+            if old_value == '_':
+                feedback = 'smooth'
+            elif old_value == 'X':
+                feedback = 'obstacle'
+            elif old_value == 'R':  # FIXME handle assemebled pieces
+                feedback = 'robot'
+            elif old_value == 'W':
+                feedback = 'damage'
+            else:
+                print 'something is terribly wrong'
+                pprint(self.grid)
 
-        if feedback == 'smooth':
-            new_grid[old_place[0]][old_place[1]] = '_'
-            new_grid[new_place[0]][new_place[1]] = 'R'
+            if feedback == 'smooth':
+                new_grid[old_place[0]][old_place[1]] = '_'
+                new_grid[new_place[0]][new_place[1]] = 'R'
+                old_place = new_place
+            elif feedback == 'damage':
+                new_grid[old_place[0]][old_place[1]] = 'r'
+
 
         return [Grid(new_grid), feedback]
 
@@ -127,12 +133,13 @@ class WAMP_SearchNode(SearchNode):
         for operator in operators:
             new_state, feedback = self.state.apply_operator(operator)
             cost = 1  # FIXME make it depend on the feedback
-            new_node = WAMP_SearchNode(new_state,
-                                       parent_node=self,
-                                       operator=operator,
-                                       depth=self.depth + 1,
-                                       path_cost=self.path_cost + cost)
-            nodes.append(new_node)
+            if feedback != 'damage':
+                new_node = WAMP_SearchNode(new_state,
+                                           parent_node=self,
+                                           operator=operator,
+                                           depth=self.depth + 1,
+                                           path_cost=self.path_cost + cost)
+                nodes.append(new_node)
         return nodes
 
     def print_path(self):
@@ -182,6 +189,7 @@ def general_search(search_problem, nodes_q):
         if len(nodes_q) == 0:
             return False
         node = nodes_q.remove_front()
+        print "%d %d" % (node.depth, len(nodes_q))
         if search_problem.goal_test(node.state):
             return node
         nodes_q.enqueue(search_problem.expand_node(node))
@@ -190,9 +198,12 @@ def general_search(search_problem, nodes_q):
 def run():
     g = Grid()
     search_problem = WAMP_SearchProblem(g)
+    print g
+    print '-----\n\n'
 
     # nodes_q = BFS_Queue()
-    return general_search(search_problem, BFS_Queue())
+    nodes_q = BFS_Queue()
+    return general_search(search_problem, nodes_q)
 
-node = run()
-node.print_path()
+#node = run()
+#node.print_path()
