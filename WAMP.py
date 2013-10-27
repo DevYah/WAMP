@@ -56,7 +56,7 @@ class Grid(State):
 
         new_grid = deepcopy(self.grid)
         part_number = operator[0]
-        old_place = self.parts_locations[part_number]
+        old_place = copy(self.parts_locations[part_number])
         feedback = None
         while feedback == 'smooth' or feedback is None:
             new_place = move(old_place, operator[1])
