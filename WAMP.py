@@ -2,7 +2,7 @@ from ADTs import State, SearchNode, SearchProblem
 from random import random, randint
 from pprint import pprint, pformat
 from copy import deepcopy, copy
-from search_queues import BFS_Queue
+from search_queues import BFS_Queue, DFS_Queue
 
 
 class Grid(State):
