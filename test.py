@@ -1,6 +1,11 @@
 from WAMP import *
 
-
+def assemble_parts():
+    g_ar = [['_', '_', '_', '_', 'R'],
+            ['_', '_', '_', '_', '_'],
+            ['R', '_', 'R', '_', '_'],
+            ['X', '_', '_', '_', '_'],
+            ['_', '_', '_', 'R', 'R']]
 def test_apply_operator_damadge():
     grid_ar = [['R', '_', '_'], ['_'] * 3, ['_'] * 3]
     g = Grid(grid_ar)

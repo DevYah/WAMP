@@ -5,13 +5,37 @@ from copy import deepcopy, copy
 from search_queues import BFS_Queue, DFS_Queue
 
 
+class Part:
+    def __init__(self, locations):
+        self.locations = locations
+
+    def __str__(self):
+        s = ''
+        for location in self.locations:
+            s += "(%d,%d)" % (location[0], location[1])
+        return s
+
+    def can_assemble(self, other):
+        pairwise = [(loc1,loc2) for loc1 in self.locations for loc2 in other.locations]
+        for pair in pairwise:
+            if sum([abs(v1-v2) for v1,v2 in zip(*pair)]) == 1:
+                return True
+        return False
+
+    def assemble(self, other):
+        if self.can_assemble(other):
+            return Part(self.locations + other.locations)
+        else:
+            print 'WHAT THE FUCK YOU WANT'
+
+
 class Grid(State):
 
     def __init__(self, grid=None):
         self.grid = grid or Grid.gen_grid()
         self.side = len(self.grid)
-        self.parts_locations = self.store_part_locations()
-        self.num_parts = len(self.parts_locations)
+        self.parts = self.get_parts()
+        self.assemble_parts()
 
     def __str__(self):
         s = pformat(self.grid)
@@ -24,18 +48,45 @@ class Grid(State):
     def __ne__(self, other):
         return self.grid != other.grid
 
-    def store_part_locations(self):
-        locations = []
+    def get_parts(self):
+        parts = []
+        pprint(self.grid)
         for i in xrange(len(self.grid)):
             for j in xrange(len(self.grid[i])):
                 if self.grid[i][j] == 'R':
-                    locations.append([i, j])
-        return locations
+                    print 'APPENDING at (%d,%d)' % (i,j)
+                    parts.append(Part([[i, j]]))
+
+        print "I have %d parts" % len(parts)
+        return parts
+
+    def assemble_parts(self):
+        first_time = True
+        fixed_point = None
+        while first_time or not fixed_point:
+            fixed_point = True
+            first_time = False
+            for i in xrange(len(self.parts)):
+                for j in xrange(i+1,len(self.parts)):
+                    if i == j or self.parts[i] is None or self.parts[j] is None:
+                        continue
+                    if self.parts[i].can_assemble(self.parts[j]):
+                        print 'CAN FUCKING ASSEMBLE'
+                        print self.parts[i]
+                        print self.parts[j]
+                        print '____________________'
+                        new_part = self.parts[i].assemble(self.parts[j])
+                        self.parts.append(new_part)
+                        self.parts[i] = None
+                        self.parts[j] = None
+                        fixed_point = False
+
+        self.parts = filter(lambda x: x is not None, self.parts)
 
     def possible_operators(self):
         # TODO handle assembled parts
         motions = ['N', 'E', 'S', 'W']
-        n_parts = self.num_parts
+        n_parts = len(self.parts)
         return [(part, motion) for part in xrange(n_parts) for motion in motions]
 
     def apply_operator(self, operator):
@@ -56,7 +107,7 @@ class Grid(State):
 
         new_grid = deepcopy(self.grid)
         part_number = operator[0]
-        old_place = copy(self.parts_locations[part_number])
+        old_place = copy(self.parts[part_number].locatoin)
         feedback = None
         while feedback == 'smooth' or feedback is None:
             new_place = move(old_place, operator[1])
