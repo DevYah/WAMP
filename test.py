@@ -1,25 +1,19 @@
 from WAMP import *
 
-def assemble_parts():
-    g_ar = [['_', '_', '_', '_', 'R'],
-            ['_', '_', '_', '_', '_'],
-            ['R', '_', 'R', '_', '_'],
-            ['X', '_', '_', '_', '_'],
-            ['_', '_', '_', 'R', 'R']]
 def test_apply_operator_damadge():
     grid_ar = [['R', '_', '_'], ['_'] * 3, ['_'] * 3]
     g = Grid(grid_ar)
     #node = WAMP_SearchNode(g)
     new_grid, feedback = g.apply_operator((0, 'N'))
     assert feedback == 'damage'
-    assert new_grid.grid == [['r', '_', '_'], ['_', '_', '_'], ['_', '_', '_']]
+    assert new_grid.grid == [['R', '_', '_'], ['_', '_', '_'], ['_', '_', '_']]
     new_grid, feedback = g.apply_operator((0, 'E'))
     assert feedback == 'damage'
-    assert new_grid.grid == [['_', '_', 'r'], ['_', '_', '_'], ['_', '_', '_']]
+    assert new_grid.grid == [['_', '_', 'R'], ['_', '_', '_'], ['_', '_', '_']]
 
     new_grid, feedback = g.apply_operator((0, 'S'))
     assert feedback == 'damage'
-    assert new_grid.grid == [['_', '_', '_'], ['_', '_', '_'], ['r', '_', '_']]
+    assert new_grid.grid == [['_', '_', '_'], ['_', '_', '_'], ['R', '_', '_']]
     print 'PASSES DAMAGE TEST'
 
 
