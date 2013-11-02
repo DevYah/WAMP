@@ -20,9 +20,9 @@ class Part:
         return self.__str__()
 
     def can_assemble(self, other):
-        pairwise = [(loc1,loc2) for loc1 in self.locations for loc2 in other.locations]
+        pairwise = [(loc1, loc2) for loc1 in self.locations for loc2 in other.locations]
         for pair in pairwise:
-            if sum([abs(v1-v2) for v1,v2 in zip(*pair)]) == 1:
+            if sum([abs(v1 - v2) for v1, v2 in zip(*pair)]) == 1:
                 return True
         return False
 
@@ -45,7 +45,7 @@ class Grid(State):
         if self.grid[i][j] == 'X':
             return 'X'
         elif self.grid[i][j] == 'R':
-            return str([self.parts.index(part) for part in self.parts if [i,j] in part.locations][0])
+            return str([self.parts.index(part) for part in self.parts if [i, j] in part.locations][0])
         else:
             return '_'
 
@@ -54,7 +54,7 @@ class Grid(State):
         for i in xrange(len(self.grid)):
             for j in xrange(len(self.grid)):
                 #print self.get_char(i,j)
-                s += self.get_char(i,j)
+                s += self.get_char(i, j)
                 s += ' '
             s += "\n" if i != len(self.grid) - 1 else ''
 
@@ -88,7 +88,7 @@ class Grid(State):
             fixed_point = True
             first_time = False
             for i in xrange(len(self.parts)):
-                for j in xrange(i+1,len(self.parts)):
+                for j in xrange(i + 1, len(self.parts)):
                     if i == j or self.parts[i] is None or self.parts[j] is None:
                         continue
                     if self.parts[i].can_assemble(self.parts[j]):
@@ -116,7 +116,7 @@ class Grid(State):
     @staticmethod
     def apply_direction(loc, direction):
         delta = Grid.delta_direction(direction)
-        return [v1+v2 for v1,v2 in zip(loc, delta)]
+        return [v1 + v2 for v1, v2 in zip(loc, delta)]
 
     def feedback(self, location, direction, other_locations=[]):
         new_loc = Grid.apply_direction(location, direction)
@@ -143,6 +143,9 @@ class Grid(State):
         motions = ['N', 'E', 'S', 'W']
         n_parts = len(self.parts)
         return [(part, motion) for part in xrange(n_parts) for motion in motions]
+
+    def ap_op(self, op):
+        return self.apply_operator(op)
 
     def apply_operator(self, operator):
         ''' returns an array of the new State (Grid) and a feedback '''
@@ -186,7 +189,7 @@ class Grid(State):
 
     @staticmethod
     def gen_grid():
-        side = randint(4, 5)
+        side = randint(4, 8)
         grid = [[random() for _ in xrange(side)] for _ in xrange(side)]
 
         def mapping(x):
