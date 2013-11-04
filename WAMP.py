@@ -20,7 +20,9 @@ class Part:
         return self.__str__()
 
     def can_assemble(self, other):
-        pairwise = [(loc1, loc2) for loc1 in self.locations for loc2 in other.locations]
+        pairwise = [(loc1, loc2) for loc1 in self.locations
+                    for loc2 in other.locations]
+
         for pair in pairwise:
             if sum([abs(v1 - v2) for v1, v2 in zip(*pair)]) == 1:
                 return True
@@ -45,7 +47,8 @@ class Grid(State):
         if self.grid[i][j] == 'X':
             return 'X'
         elif self.grid[i][j] == 'R':
-            return str([self.parts.index(part) for part in self.parts if [i, j] in part.locations][0])
+            return str([self.parts.index(part) for part in self.parts
+                        if [i, j] in part.locations][0])
         else:
             return '_'
 
@@ -89,7 +92,8 @@ class Grid(State):
             first_time = False
             for i in xrange(len(self.parts)):
                 for j in xrange(i + 1, len(self.parts)):
-                    if i == j or self.parts[i] is None or self.parts[j] is None:
+                    part_i, part_j = self.parts[i], self.parts[j]
+                    if i == j or part_i is None or part_j is None:
                         continue
                     if self.parts[i].can_assemble(self.parts[j]):
                         new_part = self.parts[i].assemble(self.parts[j])
@@ -142,14 +146,15 @@ class Grid(State):
     def possible_operators(self):
         motions = ['N', 'E', 'S', 'W']
         n_parts = len(self.parts)
-        return [(part, motion) for part in xrange(n_parts) for motion in motions]
+        return [(part, motion) for part in xrange(n_parts)
+                for motion in motions]
 
     def ap_op(self, op):
         return self.apply_operator(op)
 
     def apply_operator(self, operator):
         ''' returns an array of the new State (Grid) and a feedback '''
-        # TODO handle assembled parts
+        # TODO COMPUTE COST
         part = self.parts[operator[0]]
         direction = operator[1]
         locs = sorted(part.locations)
@@ -219,7 +224,10 @@ class WAMP_SearchNode(SearchNode):
         self.path_cost = path_cost
 
     def __str__(self):
-        s = "Node, Depth: %d, operator: %s\n" % (self.depth, self.operator)
+        template = "Node, Depth: %d\n, operator: %s\n, path_cost: %s\n"
+        s = template % (self.depth,
+                        self.operator,
+                        self.path_cost)
         s += format(self.state)
         return s
 
@@ -238,9 +246,13 @@ class WAMP_SearchNode(SearchNode):
                 nodes.append(new_node)
         return nodes
 
-    def print_path(self):
-        print self
-        self.parent_node.print_path() if self.parent_node is not None else None
+    def path_repr(self):
+        s = ''
+        possible = self.parent_node is not None
+        s += self.parent_node.path_repr() if possible else ''
+        s += self.__str__()
+        s += "\n"
+        return s
 
 
 class WAMP_SearchProblem(SearchProblem):
@@ -248,9 +260,6 @@ class WAMP_SearchProblem(SearchProblem):
     def __init__(self, initial_state):
         self.initial_state = initial_state
         self.operators = self.initial_state.possible_operators()
-
-    def state_space(self, seq_actions):
-        pass
 
     def goal_test(self, state):
         return len(state.parts) == 1
@@ -273,10 +282,82 @@ class WAMP_SearchProblem(SearchProblem):
         #return True
 
     def path_cost(self, actions):
+        # DEPRECATED
+        raise Exception('deprecated and useless')
         pass
 
     def expand_node(self, node):
         return node.expand()
+
+
+def search(grid, strategy, visualize):
+    search_problem = WAMP_SearchProblem(grid)
+    if strategy == 'BFS':
+        return bfs(search_problem, visualize)
+    elif strategy == 'DFS':
+        return dfs(search_problem, visualize)
+    elif strategy == 'ID':
+        return ID(search_problem, visualize)
+    elif strategy == 'GR1':
+        return GR1(search_problem, visualize)
+    elif strategy == 'GR2':
+        return GR2(search_problem, visualize)
+    elif strategy == 'AS1':
+        return AS1(search_problem, visualize)
+    elif strategy == 'AS2':
+        return AS2(search_problem, visualize)
+    else:
+        raise Exception('Gayeen nehazar!!? choose a proper strategy')
+
+
+def bfs(search_problem, visualize):
+    expanded_nodes_count = 0
+    start_node = WAMP_SearchNode(search_problem.initial_state)
+    nodes_q = BFS_Queue()
+    nodes_q.enqueue([start_node])
+    while True:
+        if len(nodes_q) == 0:
+            return [None, None, expanded_nodes_count]
+        node = nodes_q.remove_front()
+        expanded_nodes_count += 1
+        if search_problem.goal_test(node.state):
+            return [node.path_repr(), 'computed_cost', expanded_nodes_count]
+        nodes_q.enqueue(node.expand())
+
+
+def dfs(search_problem, visualize):
+    expanded_nodes_count = 0
+    start_node = WAMP_SearchNode(search_problem.initial_state)
+    nodes_q = DFS_Queue()
+    nodes_q.enqueue([start_node])
+    while True:
+        if len(nodes_q) == 0:
+            return [None, None, expanded_nodes_count]
+        node = nodes_q.remove_front()
+        expanded_nodes_count += 1
+        if search_problem.goal_test(node.state):
+            return [node.path_repr(), 'computed_cost', expanded_nodes_count]
+        nodes_q.enqueue(node.expand())
+
+
+def ID(grid, visualize):
+    pass
+
+
+def GR1(grid, visualize):
+    pass
+
+
+def GR2(grid, visualize):
+    pass
+
+
+def AS1(grid, visualize):
+    pass
+
+
+def AS2(grid, visualize):
+    pass
 
 
 def general_search(search_problem, nodes_q):
