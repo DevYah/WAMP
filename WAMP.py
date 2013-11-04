@@ -361,13 +361,12 @@ def ID(search_problem, visualize):
         node = nodes_q.remove_front()
         print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
 
-        if node.depth == depth_limit:
-            #print 'MAX depth %d reached' % depth_limit
-            continue
-
         if search_problem.goal_test(node.state):
             return [node.path_repr(), 'computed_cost', expanded_nodes_count]
 
+        if node.depth == depth_limit:
+            #print 'MAX depth %d reached' % depth_limit
+            continue
         expanded_nodes_count += 1
         nodes_q.enqueue(node.expand())
 
