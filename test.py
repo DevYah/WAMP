@@ -1,5 +1,24 @@
 from WAMP import *
 
+def test_move1():
+    g_ar = [['_', '_', '_'],
+            ['_', 'R', 'R'],
+            ['_', 'X', 'R']]
+    g = Grid(g_ar)
+    _, feedback = g.ap_op((0, 'S'))
+    assert feedback == 'damage'
+    print 'PASSES MOVE1'
+
+
+def test_move2():
+    g_ar = [['_', '_', '_'],
+            ['R', 'R', '_'],
+            ['R', 'X', '_']]
+    g = Grid(g_ar)
+    _, feedback = g.ap_op((0, 'S'))
+    assert feedback == 'damage'
+    print 'PASSES MOVE2'
+
 def test_apply_operator_damadge():
     grid_ar = [['R', '_', '_'], ['_'] * 3, ['_'] * 3]
     g = Grid(grid_ar)
@@ -64,8 +83,9 @@ def test_bfs_solution_simple2():
     search_problem = WAMP_SearchProblem(g)
     nodes_q = BFS_Queue()
     goal_node = general_search(search_problem, nodes_q)
-    goal_node = general_search(search_problem, nodes_q)
+    assert search_problem.goal_test(goal_node.state)
     print 'PASSES BFS SIMPLE2'
+
 
 def test_dfs_solution_simple1():
     g_ar = [['_', 'X', '_'],
@@ -78,6 +98,7 @@ def test_dfs_solution_simple1():
     assert search_problem.goal_test(goal_node.state)
     print 'PASSES BFS SIMPLE1'
 
+
 def test_dfs_solution_simple2():
     g_ar = [['_', 'X', '_'],
             ['R', '_', 'X'],
@@ -86,9 +107,12 @@ def test_dfs_solution_simple2():
     search_problem = WAMP_SearchProblem(g)
     nodes_q = DFS_Queue()
     goal_node = general_search(search_problem, nodes_q)
-    goal_node = general_search(search_problem, nodes_q)
+    assert search_problem.goal_test(goal_node.state)
     print 'PASSES BFS SIMPLE2'
 
+
+test_move1()
+test_move2()
 test_apply_operator_damadge()
 test_apply_operator_obstacle()
 test_bfs_solution_simple1()

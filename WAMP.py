@@ -224,7 +224,7 @@ class WAMP_SearchNode(SearchNode):
         self.path_cost = path_cost
 
     def __str__(self):
-        template = "Node, Depth: %d\n, operator: %s\n, path_cost: %s\n"
+        template = "Node\nDepth: %d\noperator: %s\npath_cost: %s\n"
         s = template % (self.depth,
                         self.operator,
                         self.path_cost)
@@ -319,6 +319,7 @@ def bfs(search_problem, visualize):
         if len(nodes_q) == 0:
             return [None, None, expanded_nodes_count]
         node = nodes_q.remove_front()
+        print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
         expanded_nodes_count += 1
         if search_problem.goal_test(node.state):
             return [node.path_repr(), 'computed_cost', expanded_nodes_count]
@@ -334,14 +335,41 @@ def dfs(search_problem, visualize):
         if len(nodes_q) == 0:
             return [None, None, expanded_nodes_count]
         node = nodes_q.remove_front()
+        print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
         expanded_nodes_count += 1
         if search_problem.goal_test(node.state):
             return [node.path_repr(), 'computed_cost', expanded_nodes_count]
         nodes_q.enqueue(node.expand())
 
 
-def ID(grid, visualize):
-    pass
+def ID(search_problem, visualize):
+    depth_limit = 1
+    expanded_nodes_count = 0
+    start_node = WAMP_SearchNode(search_problem.initial_state)
+    nodes_q = DFS_Queue()
+    nodes_q.enqueue([start_node])
+    while True:
+        if len(nodes_q) == 0:
+            #print 'MAX depth %d reached with all nodex explored' % depth_limit
+            depth_limit += 1
+            nodes_q = DFS_Queue()
+            nodes_q.enqueue([start_node])
+            print '++++++ INCREASIG DEPTH LIMIT to  %d +++++' % (depth_limit)
+            continue
+            #return [None, None, expanded_nodes_count]
+
+        node = nodes_q.remove_front()
+        print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
+
+        if node.depth == depth_limit:
+            #print 'MAX depth %d reached' % depth_limit
+            continue
+
+        if search_problem.goal_test(node.state):
+            return [node.path_repr(), 'computed_cost', expanded_nodes_count]
+
+        expanded_nodes_count += 1
+        nodes_q.enqueue(node.expand())
 
 
 def GR1(grid, visualize):
@@ -382,6 +410,7 @@ def run():
     # nodes_q = BFS_Queue()
     nodes_q = BFS_Queue()
     return general_search(search_problem, nodes_q)
+
 
 #node = run()
 #node.print_path()
