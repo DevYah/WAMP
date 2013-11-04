@@ -156,6 +156,7 @@ class Grid(State):
     def apply_operator(self, operator):
         ''' returns an array of the new State (Grid) and a feedback '''
         # TODO COMPUTE COST
+        steps = 0
         part = self.parts[operator[0]]
         direction = operator[1]
         locs = sorted(part.locations)
@@ -177,8 +178,9 @@ class Grid(State):
 
             if can_move:
                 locs = current_grid.move(locs, direction)
+                steps += 1
             else:
-                return current_grid, feedback
+                return current_grid, feedback, steps * len(locs)
 
     def move(self, locations, direction):
         new_locations = []
@@ -236,8 +238,7 @@ class WAMP_SearchNode(SearchNode):
         operators = self.state.possible_operators()
         nodes = []
         for operator in operators:
-            new_state, feedback = self.state.apply_operator(operator)
-            cost = 1  # TODO properly calculate it
+            new_state, feedback, cost = self.state.apply_operator(operator)
             if feedback != 'damage':
                 new_node = WAMP_SearchNode(new_state,
                                            parent_node=self,
@@ -341,7 +342,7 @@ def ID(search_problem, visualize=False):
         print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
 
         if search_problem.goal_test(node.state):
-            return [node.path_repr(), 'computed_cost', expanded_nodes_count]
+            return [node.path_repr(), node.path_cost, expanded_nodes_count]
 
         if node.depth == depth_limit:
             #print 'MAX depth %d reached' % depth_limit
@@ -382,7 +383,7 @@ def general_search(search_problem, nodes_q):
         print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
         expanded_nodes_count += 1
         if search_problem.goal_test(node.state):
-            return [node.path_repr(), 'computed_cost', expanded_nodes_count]
+            return [node.path_repr(), node.path_cost, expanded_nodes_count]
         nodes_q.enqueue(node.expand())
 
 
