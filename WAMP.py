@@ -155,7 +155,6 @@ class Grid(State):
 
     def apply_operator(self, operator):
         ''' returns an array of the new State (Grid) and a feedback '''
-        # TODO COMPUTE COST
         steps = 0
         part = self.parts[operator[0]]
         direction = operator[1]
