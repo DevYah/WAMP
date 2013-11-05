@@ -234,6 +234,16 @@ class WAMP_SearchNode(SearchNode):
         s += format(self.state)
         return s
 
+    def __repr__(self):
+        delim = "\n--------------------------------"
+        template = delim + "Node\nDepth: %d\noperator: %s\npath_cost: %s\n"
+        s = template % (self.depth,
+                        self.operator,
+                        self.path_cost)
+        s += format(self.state)
+        s += delim
+        return s
+
     def expand(self):
         operators = self.state.possible_operators()
         nodes = []
@@ -365,11 +375,16 @@ def greedy(search_problem, heuristic_func, visualize=False):
 
 
 def AS1(search_problem, visualize=False):
-    pass
+    return A_star(search_problem, heuristic1)
 
 
 def AS2(search_problem, visualize=False):
-    pass
+    return A_star(search_problem, heuristic2)
+
+
+def A_star(search_problem, heuristic_func, visualize=False):
+    nodes_q = BestFirst_Queue(heuristic_func, a_star=True)
+    return general_search(search_problem, nodes_q)
 
 
 def general_search(search_problem, nodes_q):
@@ -381,9 +396,9 @@ def general_search(search_problem, nodes_q):
             return [None, None, expanded_nodes_count]
         node = nodes_q.remove_front()
         print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
-        expanded_nodes_count += 1
         if search_problem.goal_test(node.state):
             return [node.path_repr(), node.path_cost, expanded_nodes_count]
+        expanded_nodes_count += 1
         nodes_q.enqueue(node.expand())
 
 
