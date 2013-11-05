@@ -253,8 +253,9 @@ class WAMP_SearchNode(SearchNode):
                 new_node = WAMP_SearchNode(new_state,
                                            parent_node=self,
                                            operator=operator,
+                                           # XXX this is different from the project description
                                            depth=self.depth + 1,
-                                           path_cost=self.path_cost + cost)
+                                           path_cost=self.path_cost + cost + 1)
                 nodes.append(new_node)
         return nodes
 

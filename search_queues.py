@@ -60,7 +60,7 @@ class BestFirst_Queue(SearchQueue):
         for node in nodes:
             cost = self.cost_function(node)
             if self.a_star:
-                cost += (node.path_cost + node.depth)
+                cost += (node.path_cost)
             heappush(self.q, (cost, node))
 
     def remove_front(self):
