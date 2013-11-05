@@ -6,6 +6,9 @@ from search_queues import BFS_Queue, DFS_Queue, BestFirst_Queue
 from heuristics import heuristic1, heuristic2
 
 
+global_node = None
+
+
 class Part:
     def __init__(self, locations):
         self.locations = locations
@@ -42,6 +45,55 @@ class Grid(State):
         self.grid = grid or Grid.gen_grid()
         self.side = len(self.grid)
         self.get_parts()
+
+    def apply_operator(self, operator):
+        ''' returns an array of the new State (Grid) and a feedback '''
+        steps = 0
+        part = self.parts[operator[0]]
+        direction = operator[1]
+        locs = sorted(part.locations)
+
+        if direction == 'E' or direction == 'S':
+            locs.reverse()
+
+        current_grid = deepcopy(self)
+
+        while True:
+            can_move = True
+            for loc in locs:
+                assembled = list(locs)
+                assembled.remove(loc)
+                feedback = current_grid.feedback(loc, direction, assembled)
+                can_move &= feedback in ['smooth']
+                if not can_move:
+                    break
+
+            if can_move:
+                locs = current_grid.move(locs, direction)
+                steps += 1
+            else:
+                return current_grid, feedback, steps * len(locs)
+
+    def possible_operators(self):
+        motions = ['N', 'E', 'S', 'W']
+        n_parts = len(self.parts)
+        return [(part, motion) for part in xrange(n_parts)
+                for motion in motions]
+
+    @staticmethod
+    def gen_grid():
+        side = randint(4, 8)
+        grid = [[random() for _ in xrange(side)] for _ in xrange(side)]
+
+        def mapping(x):
+            if x < 0.2:
+                return 'R'
+            elif x < 0.3:
+                return 'X'
+            else:
+                return '_'
+        grid = [[mapping(cell) for cell in row] for row in grid]
+        return grid
 
     def get_char(self, i, j):
         #print "i %d, j %d" % (i,j)
@@ -144,42 +196,8 @@ class Grid(State):
         elif value == 'W':
             return 'damage'
 
-    def possible_operators(self):
-        motions = ['N', 'E', 'S', 'W']
-        n_parts = len(self.parts)
-        return [(part, motion) for part in xrange(n_parts)
-                for motion in motions]
-
     def ap_op(self, op):
         return self.apply_operator(op)
-
-    def apply_operator(self, operator):
-        ''' returns an array of the new State (Grid) and a feedback '''
-        steps = 0
-        part = self.parts[operator[0]]
-        direction = operator[1]
-        locs = sorted(part.locations)
-
-        if direction == 'E' or direction == 'S':
-            locs.reverse()
-
-        current_grid = deepcopy(self)
-
-        while True:
-            can_move = True
-            for loc in locs:
-                assembled = list(locs)
-                assembled.remove(loc)
-                feedback = current_grid.feedback(loc, direction, assembled)
-                can_move &= feedback in ['smooth']
-                if not can_move:
-                    break
-
-            if can_move:
-                locs = current_grid.move(locs, direction)
-                steps += 1
-            else:
-                return current_grid, feedback, steps * len(locs)
 
     def move(self, locations, direction):
         new_locations = []
@@ -193,21 +211,6 @@ class Grid(State):
             self.grid[location[0]][location[1]] = '_'
             self.get_parts()
         return new_locations
-
-    @staticmethod
-    def gen_grid():
-        side = randint(4, 8)
-        grid = [[random() for _ in xrange(side)] for _ in xrange(side)]
-
-        def mapping(x):
-            if x < 0.2:
-                return 'R'
-            elif x < 0.3:
-                return 'X'
-            else:
-                return '_'
-        grid = [[mapping(cell) for cell in row] for row in grid]
-        return grid
 
 
 class WAMP_SearchNode(SearchNode):
@@ -252,7 +255,8 @@ class WAMP_SearchNode(SearchNode):
                 new_node = WAMP_SearchNode(new_state,
                                            parent_node=self,
                                            operator=operator,
-                                           # XXX this is different from the project description
+                                           # XXX this is different from the
+                                           # project description
                                            depth=self.depth + 1,
                                            path_cost=self.path_cost + cost + 1)
                 nodes.append(new_node)
@@ -388,6 +392,7 @@ def A_star(search_problem, heuristic_func, visualize=False):
 
 
 def general_search(search_problem, nodes_q):
+    global global_node
     expanded_nodes_count = 0
     start_node = WAMP_SearchNode(search_problem.initial_state)
     nodes_q.enqueue([start_node])
@@ -395,6 +400,7 @@ def general_search(search_problem, nodes_q):
         if len(nodes_q) == 0:
             return [None, None, expanded_nodes_count]
         node = nodes_q.remove_front()
+        global_node = node
         print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
         if search_problem.goal_test(node.state):
             return [node.path_repr(), node.path_cost, expanded_nodes_count]
