@@ -73,3 +73,35 @@ def heuristic2(node):
             min_dist = dist
 
     return min_dist
+
+# This heuristic tries to assemble nearest parts and considers best case
+# scenario in which all parts decrease between the distance  between the
+# next part and the original part
+# BEST PLACEMENT
+def admisisble1(node):
+    grid = node.state
+    units = map(lambda x: x.locations, grid.parts)
+    units = [tuple(u) for l in units for u in l]
+    min_sum = 999999999999
+    min_loc = None
+    min_index = -1
+    i = -1
+    for unit1 in units:
+        i += 1
+        currnt_parts_length = 0
+        current_dist = 0
+        for unit2 in sorted(units, key=lambda x: dist(unit1, x)):
+            current_dist += max([0, dist(unit1, unit2) - currnt_parts_length])
+            currnt_parts_length += 1
+
+        if current_dist < min_sum:
+            min_sum = current_dist
+            min_loc = unit1
+            min_index = i
+
+    #print min_loc
+    #print min_index
+    if len(grid.parts) > 1:
+        min_sum = max([1, min_sum])
+
+    return min_sum
