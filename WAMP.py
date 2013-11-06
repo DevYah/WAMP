@@ -108,7 +108,7 @@ class Grid(State):
     def __str__(self):
         s = ''
         for i in xrange(len(self.grid)):
-            for j in xrange(len(self.grid)):
+            for j in xrange(len(self.grid[i])):
                 #print self.get_char(i,j)
                 s += self.get_char(i, j)
                 s += ' '
