@@ -252,14 +252,12 @@ class WAMP_SearchNode(SearchNode):
         nodes = []
         for operator in operators:
             new_state, feedback, cost = self.state.apply_operator(operator)
-            if feedback != 'damage':
+            if feedback != 'damage' and new_state != self.state:
                 new_node = WAMP_SearchNode(new_state,
                                            parent_node=self,
                                            operator=operator,
-                                           # XXX this is different from the
-                                           # project description
                                            depth=self.depth + 1,
-                                           path_cost=self.path_cost + cost + 1)
+                                           path_cost=self.path_cost + cost)
                 nodes.append(new_node)
         return nodes
 
