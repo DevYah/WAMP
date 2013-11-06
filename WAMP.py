@@ -82,8 +82,9 @@ class Grid(State):
 
     @staticmethod
     def gen_grid():
-        side = randint(4, 8)
-        grid = [[random() for _ in xrange(side)] for _ in xrange(side)]
+        side1 = randint(4, 8)
+        side2 = randint(4, 8)
+        grid = [[random() for _ in xrange(side1)] for _ in xrange(side2)]
 
         def mapping(x):
             if x < 0.2:
@@ -178,7 +179,7 @@ class Grid(State):
     def feedback(self, location, direction, other_locations=[]):
         new_loc = Grid.apply_direction(location, direction)
         in_range = 0 <= new_loc[0] < len(self.grid)
-        in_range &= 0 <= new_loc[1] < len(self.grid)
+        in_range &= 0 <= new_loc[1] < len(self.grid[0])
         if new_loc in other_locations:
             return 'smooth'
 
