@@ -308,31 +308,23 @@ class WAMP_SearchProblem(SearchProblem):
 def search(grid, strategy, visualize=False):
     search_problem = WAMP_SearchProblem(grid)
     if strategy == 'BFS':
-        return bfs(search_problem, visualize)
+        nodes_q = BFS_Queue()
+        return general_search(search_problem, nodes_q)
     elif strategy == 'DFS':
-        return dfs(search_problem, visualize)
+        nodes_q = DFS_Queue()
+        return general_search(search_problem, nodes_q)
     elif strategy == 'ID':
         return ID(search_problem, visualize)
     elif strategy == 'GR1':
-        return GR1(search_problem, visualize)
+        return greedy(search_problem, heuristic1, visualize)
     elif strategy == 'GR2':
-        return GR2(search_problem, visualize)
+        return greedy(search_problem, heuristic2, visualize)
     elif strategy == 'AS1':
-        return AS1(search_problem, visualize)
+        return A_star(search_problem, heuristic1)
     elif strategy == 'AS2':
-        return AS2(search_problem, visualize)
+        return A_star(search_problem, heuristic2)
     else:
         raise Exception('%s is not a supported strategy' % strategy)
-
-
-def bfs(search_problem, visualize=False):
-    nodes_q = BFS_Queue()
-    return general_search(search_problem, nodes_q)
-
-
-def dfs(search_problem, visualize=False):
-    nodes_q = DFS_Queue()
-    return general_search(search_problem, nodes_q)
 
 
 def ID(search_problem, visualize=False):
@@ -362,27 +354,12 @@ def ID(search_problem, visualize=False):
             continue
         expanded_nodes_count += 1
         nodes_q.enqueue(node.expand())
-
-
-def GR1(search_problem, visualize=False):
-    return greedy(search_problem, heuristic1, visualize)
-
-
-def GR2(search_problem, visualize=False):
-    return greedy(search_problem, heuristic2, visualize)
+    return [False, 0, expanded_nodes_count]
 
 
 def greedy(search_problem, heuristic_func, visualize=False):
     nodes_q = BestFirst_Queue(heuristic_func)
     return general_search(search_problem, nodes_q)
-
-
-def AS1(search_problem, visualize=False):
-    return A_star(search_problem, heuristic1)
-
-
-def AS2(search_problem, visualize=False):
-    return A_star(search_problem, heuristic2)
 
 
 def A_star(search_problem, heuristic_func, visualize=False):
@@ -405,6 +382,7 @@ def general_search(search_problem, nodes_q):
             return [node.path_repr(), node.path_cost, expanded_nodes_count]
         expanded_nodes_count += 1
         nodes_q.enqueue(node.expand())
+    return [False, 0, expanded_nodes_count]
 
 
 def run():
