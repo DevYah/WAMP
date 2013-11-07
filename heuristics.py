@@ -7,12 +7,41 @@ def dist(loc1, loc2):
 def minimum_dist(part1, part2):
     return min([dist(a, b)
                 for a in part1.locations
-                for b in part2.locations]) - 1
+                for b in part2.locations])
+
+
+def max_dist_to_units(unit, units):
+    return max([dist(unit, unit2) for unit2 in units])
+
+
+def max_dist_to_parts(part, parts):
+    return max([minimum_dist(part, part2) - 1 for part2 in parts])
 
 
 def heuristic1(node):
     grid = node.state
     return len(grid.parts) - 1
+
+
+# It simply returns min[ sum_over_p1(minimum_dist(p1, p2) * num_units(p2)) ]
+# For p1 in parts, p2 in parts, p1 != p2].  In plain english, this heuristic
+# tries to find a unit u such that the distance travelled by all units to
+# assemble to that u is minimized. And returns that minimized distance.
+def heuristic2(node):
+    parts = node.state.parts
+    min_dist = 99999999999
+    for p1 in parts:
+        dist = 0
+        for p2 in parts:
+            if p1 is p2:
+                continue
+
+            dist += minimum_dist(p1, p2) * len(p2.locations)
+
+        if dist < min_dist:
+            min_dist = dist
+
+    return min_dist
 
 
 # Sum of the min_dist(Ui) for all Ui in Units and min_dist is defined as
@@ -39,7 +68,7 @@ def heuristic4(node):
     units = map(lambda x: x.locations, grid.parts)
     units = [tuple(u) for l in units for u in l]
     min_dist = 999999999999999
-    min_loc = None
+    #min_loc = None
     for a in units:
         #print a
         current_dist = 0
@@ -52,27 +81,11 @@ def heuristic4(node):
         #print "\t\t %d" % current_dist
         if current_dist < min_dist:
             min_dist = current_dist
-            min_loc = a
+            #min_loc = a
 
     #print min_loc
     return min_dist
 
-
-def heuristic2(node):
-    parts = node.state.parts
-    min_dist = 99999999999
-    for p1 in parts:
-        dist = 0
-        for p2 in parts:
-            if p1 is p2:
-                continue
-
-            dist += minimum_dist(p1, p2) * len(p2.locations)
-
-        if dist < min_dist:
-            min_dist = dist
-
-    return min_dist
 
 # This heuristic tries to assemble nearest parts and considers best case
 # scenario in which all parts decrease between the distance  between the
@@ -83,8 +96,8 @@ def admisisble1(node):
     units = map(lambda x: x.locations, grid.parts)
     units = [tuple(u) for l in units for u in l]
     min_sum = 999999999999
-    min_loc = None
-    min_index = -1
+    #min_loc = None
+    #min_index = -1
     i = -1
     for unit1 in units:
         i += 1
@@ -96,8 +109,8 @@ def admisisble1(node):
 
         if current_dist < min_sum:
             min_sum = current_dist
-            min_loc = unit1
-            min_index = i
+            #min_loc = unit1
+            #min_index = i
 
     #print min_loc
     #print min_index
@@ -105,3 +118,10 @@ def admisisble1(node):
         min_sum = max([1, min_sum])
 
     return min_sum
+
+
+# min(max_dist_to_parts(pi, P) for all ui in P)
+def admisisble2(node):
+    grid = node.state
+    parts = grid.parts
+    return min([max_dist_to_parts(p, parts) for p in parts])
