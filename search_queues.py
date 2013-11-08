@@ -66,7 +66,8 @@ class BestFirst_Queue(SearchQueue):
     def remove_front(self):
         cost, node = heappop(self.q)
         if self.a_star:
-            print 'Node pop %d, path_cost: %d, heuristic: %d' % (cost, node.path_cost, cost-node.path_cost)
+            template = 'Node pop %d, path_cost: %d, heuristic: %d'
+            print template % (cost, node.path_cost, cost - node.path_cost)
         else:
             print 'heuristic: %d' % (cost)
         return node

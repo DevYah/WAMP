@@ -309,10 +309,10 @@ def search(grid, strategy, visualize=True):
     search_problem = WAMP_SearchProblem(grid)
     if strategy == 'BFS':
         nodes_q = BFS_Queue()
-        return general_search(search_problem, nodes_q)
+        return general_search(search_problem, nodes_q, visualize)
     elif strategy == 'DFS':
         nodes_q = DFS_Queue()
-        return general_search(search_problem, nodes_q)
+        return general_search(search_problem, nodes_q, visualize)
     elif strategy == 'ID':
         return ID(search_problem, visualize)
     elif strategy == 'GR1':
@@ -320,9 +320,9 @@ def search(grid, strategy, visualize=True):
     elif strategy == 'GR2':
         return greedy(search_problem, heuristic2, visualize)
     elif strategy == 'AS1':
-        return A_star(search_problem, admissible1)
+        return A_star(search_problem, admissible1, visualize)
     elif strategy == 'AS2':
-        return A_star(search_problem, admissible2)
+        return A_star(search_problem, admissible2, visualize)
     else:
         raise Exception('%s is not a supported strategy' % strategy)
 
