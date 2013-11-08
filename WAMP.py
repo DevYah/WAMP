@@ -3,7 +3,7 @@ from random import random, randint
 #from pprint import pprint, pformat
 from copy import deepcopy
 from search_queues import BFS_Queue, DFS_Queue, BestFirst_Queue
-from heuristics import heuristic1, heuristic2
+from heuristics import heuristic1, heuristic2, admissible1, admissible2, admissible3
 
 
 global_node = None
@@ -305,7 +305,7 @@ class WAMP_SearchProblem(SearchProblem):
         return node.expand()
 
 
-def search(grid, strategy, visualize=False):
+def search(grid, strategy, visualize=True):
     search_problem = WAMP_SearchProblem(grid)
     if strategy == 'BFS':
         nodes_q = BFS_Queue()
@@ -320,14 +320,14 @@ def search(grid, strategy, visualize=False):
     elif strategy == 'GR2':
         return greedy(search_problem, heuristic2, visualize)
     elif strategy == 'AS1':
-        return A_star(search_problem, heuristic1)
+        return A_star(search_problem, admissible1)
     elif strategy == 'AS2':
-        return A_star(search_problem, heuristic2)
+        return A_star(search_problem, admissible2)
     else:
         raise Exception('%s is not a supported strategy' % strategy)
 
 
-def ID(search_problem, visualize=False):
+def ID(search_problem, visualize=True):
     depth_limit = 1
     expanded_nodes_count = 0
     start_node = WAMP_SearchNode(search_problem.initial_state)
@@ -335,39 +335,38 @@ def ID(search_problem, visualize=False):
     nodes_q.enqueue([start_node])
     while True:
         if len(nodes_q) == 0:
-            #print 'MAX depth %d reached with all nodex explored' % depth_limit
             depth_limit += 1
             nodes_q = DFS_Queue()
             nodes_q.enqueue([start_node])
-            print '++++++ INCREASIG DEPTH LIMIT to  %d +++++' % (depth_limit)
+            if visualize:
+                print '+++++ INCREASIG DEPTH LIMIT to  %d ++++' % (depth_limit)
             continue
-            #return [None, None, expanded_nodes_count]
 
         node = nodes_q.remove_front()
-        print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
+        if visualize:
+            print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
 
         if search_problem.goal_test(node.state):
             return [node.path_repr(), node.path_cost, expanded_nodes_count]
 
         if node.depth == depth_limit:
-            #print 'MAX depth %d reached' % depth_limit
             continue
         expanded_nodes_count += 1
         nodes_q.enqueue(node.expand())
     return [False, 0, expanded_nodes_count]
 
 
-def greedy(search_problem, heuristic_func, visualize=False):
+def greedy(search_problem, heuristic_func, visualize=True):
     nodes_q = BestFirst_Queue(heuristic_func)
     return general_search(search_problem, nodes_q)
 
 
-def A_star(search_problem, heuristic_func, visualize=False):
+def A_star(search_problem, heuristic_func, visualize=True):
     nodes_q = BestFirst_Queue(heuristic_func, a_star=True)
     return general_search(search_problem, nodes_q)
 
 
-def general_search(search_problem, nodes_q):
+def general_search(search_problem, nodes_q, visualize=True):
     global global_node
     expanded_nodes_count = 0
     start_node = WAMP_SearchNode(search_problem.initial_state)
@@ -377,7 +376,8 @@ def general_search(search_problem, nodes_q):
             return [None, None, expanded_nodes_count]
         node = nodes_q.remove_front()
         global_node = node
-        print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
+        if visualize:
+            print 'len(nodes_q): %d, depth: %d' % (len(nodes_q), node.depth)
         if search_problem.goal_test(node.state):
             return [node.path_repr(), node.path_cost, expanded_nodes_count]
         expanded_nodes_count += 1
@@ -388,9 +388,31 @@ def general_search(search_problem, nodes_q):
 def run():
     g = Grid()
     search_problem = WAMP_SearchProblem(g)
-    print g
-    print '-----\n\n'
+    return A_star(search_problem, admissible3)
 
     # nodes_q = BFS_Queue()
     nodes_q = BFS_Queue()
     return general_search(search_problem, nodes_q)
+
+
+def example1():
+    g_ar = [['_', '_', '_', '_', '_', '_', '_', '_'],
+            ['X', '_', '_', '_', '_', 'R', 'R', '_'],
+            ['X', '_', '_', 'R', 'R', '_', '_', '_'],
+            ['_', '_', 'X', '_', '_', '_', '_', '_'],
+            ['R', '_', '_', '_', '_', 'R', 'X', '_'],
+            ['_', '_', '_', '_', '_', 'R', 'R', '_'],
+            ['_', 'R', '_', 'R', '_', 'R', '_', '_'],
+            ['_', 'R', '_', '_', '_', '_', '_', '_']]
+    return Grid(g_ar)
+
+
+def example2():
+    g_ar = [['X', '_', '_', 'R', '_', 'X'],
+            ['_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', 'R', 'X'],
+            ['_', '_', '_', '_', '_', '_'],
+            ['_', 'R', '_', '_', 'R', '_'],
+            ['_', '_', 'R', '_', '_', '_'],
+            ['R', 'X', '_', '_', '_', 'R']]
+    return Grid(g_ar)

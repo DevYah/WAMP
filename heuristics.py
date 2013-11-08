@@ -1,5 +1,4 @@
 
-
 def dist(loc1, loc2):
     return sum([abs(a - b) for (a, b) in zip(loc1, loc2)])
 
@@ -15,7 +14,10 @@ def max_dist_to_units(unit, units):
 
 
 def max_dist_to_parts(part, parts):
-    return max([minimum_dist(part, part2) - 1 for part2 in parts])
+    if len(parts) == 1:
+        return 0
+    return max([minimum_dist(part, part2) - 1 for part2 in parts
+                if part2 != part])
 
 
 def heuristic1(node):
@@ -91,7 +93,7 @@ def heuristic4(node):
 # scenario in which all parts decrease between the distance  between the
 # next part and the original part
 # BEST PLACEMENT
-def admisisble1(node):
+def admissible1(node):
     grid = node.state
     units = map(lambda x: x.locations, grid.parts)
     units = [tuple(u) for l in units for u in l]
@@ -121,7 +123,11 @@ def admisisble1(node):
 
 
 # min(max_dist_to_parts(pi, P) for all ui in P)
-def admisisble2(node):
+def admissible2(node):
     grid = node.state
     parts = grid.parts
     return min([max_dist_to_parts(p, parts) for p in parts])
+
+
+def admissible3(node):
+    return max([admissible1(node), admissible2(node)])
